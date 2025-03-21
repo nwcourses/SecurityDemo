@@ -20,28 +20,17 @@ body,input[type=button] {
 <input id="artist" name="artist" />
 <input type='submit' value='Go!' />
 </form>
-<%
-if(locals.msg) {
-%>
 <%-msg%>
-<%
-}
-%>
 
 <%
-if(locals.results) {
-    %>
-    <ul>
-    <%
-    results.forEach (result => {
-        %>
-        <li>Title: <%-result.title%> Artist: <%-result.artist%> Year: <%-result.year%></li>
-        <%
-    });
-    %>
-    </ul>
-    <%
-}
+results.forEach (result => {
+	%>
+	<li>Title: <%-result.title%> Artist: <%-result.artist%> Year: <%-result.year%></li>
+	<%
+});
+%>
+</ul>
+<%
 %>
 </body>
 </html>

@@ -35,10 +35,12 @@ app.use(express.urlencoded({extended: false}));
 
 app.set('view engine' , 'ejs');
 
+
 app.post('/login', (req, res) => {
     let msg = "";
     try {
-         // TODO replace with secure version using placeholders
+        // TODO 1. replace with secure version using placeholders
+        // TODO 2. change to use passwords encrypted with bcrypt
         const stmt = db.prepare(`SELECT * FROM ht_users WHERE password='${req.body.password}' AND username='${req.body.username}'`);
         const results = stmt.all();
 
@@ -51,16 +53,31 @@ app.post('/login', (req, res) => {
     } catch(e) {
         msg = `Internal error: ${e}`;
     }
-    res.render('main', { msg: msg } );
+    res.render('main', { msg: msg, results: [] } );
 });
 
+app.post('/signup', (req, res) => {
+    let msg = "";
+    try {
+        // TODO 1. replace with secure version using placeholders
+        // TODO 2. change to use passwords encrypted with bcrypt
+        const stmt = db.prepare(`INSERT INTO ht_users (username, password) VALUES ('${req.body.username}', '${req.body.password}'`);
+        const info = stmt.run();
+        msg = `Signed up with ID ${info.lastInsertRowid}`;
+    } catch(e) {
+        msg = `Internal error: ${e}`;
+    }
+    res.render('main', { msg: msg, results: [] });    
+});
+
+// Middleware to add login message to all requests
 app.use((req, res, next) => {
     req.loginMsg = req.session && req.session.username ? `Logged in as ${req.session.username}. <a href='logout'>Logout</a>` : "Not logged in. <a href='login.html'>Login</a>";
     next();
 });
 
 app.get('/', (req, res) => {
-    res.render('main', { msg: req.loginMsg } );
+    res.render('main', { msg: req.loginMsg, results: [] } );
 });
 
 app.get(['/search','/artist/:artist'], (req, res) => {
@@ -74,7 +91,7 @@ app.get(['/search','/artist/:artist'], (req, res) => {
 });
 
 app.post('/buy', (req, res) => {
-    res.render('main', { msg : `${req.loginMsg}<br />You are buying the song with ID ${req.body.id}`});
+    res.render('main', { msg : `${req.loginMsg}<br />You are buying the song with ID ${req.body.id}`, results: []});
 });
 
 
