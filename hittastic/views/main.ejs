@@ -2,35 +2,71 @@
 <html>
 <head>
 <title>SQL injection/XSS demo</title>
+<script type='module' src='main.mjs'></script>
 <style>
 body,input[type=button] {
     font-family: 'Berlin Sans FB', Helvetica, Arial, sans-serif;
     background-color: #c0c0ff;
     color: black;
 }
+table {
+    border-collapse: collapse;
+}
+tr, td, th {
+    border: 1px solid black;
+}
 </style>
 </head>
 <body>
-<p><img src="/hittastic.png" alt="HitTastic! logo" /></p>
+<div><img src="/hittastic.png" alt="HitTastic! logo" /></div>
+
+<div>
 <h1>HitTastic!</h1>
 <p>Search and shop for your favourite top 40 hits on HitTastic! Whether it's pop, rock, rap or pure liquid cheese you're into, you can be sure to find it on HitTastic! With the full range of top 40 hits since 1952 on our database, you can guarantee you'll fund what you're looking for in stock. Plus, with our Year Search find out exactly what was in the chart in any year. </p>
+</div>
+<%-msg%>
+
+<div>
 <h2>Search (non-AJAX)</h2>
 <form action='/search'>
 <label for='artist'>Artist:</label>
 <input id="artist" name="artist" />
 <input type='submit' value='Go!' />
 </form>
-<%-msg%>
+</div>
+<%
+if(locals.results) {
+%>
+<div>
+<table>
+<thead>
+    <tr><th>Title</th><th>Artist</th><th>Year</th><th></th></tr>
+</thead>
+<tbody>
 
 <%
+
 results.forEach (result => {
-	%>
-	<li>Title: <%-result.title%> Artist: <%-result.artist%> Year: <%-result.year%></li>
-	<%
+    %>
+    <tr>
+    <td><%-result.title%></td>
+    <td><%-result.artist%></td>    
+    <td><%-result.year%></td>
+    <td>
+    <form method='post' action='/buy'>
+    <input type='hidden' name='id' value='<%-result.id%>' />
+    <input type='submit' value='Buy!' />
+    </form>
+    </td>
+    </tr>
+    <%
 });
+
+}
 %>
-</ul>
-<%
-%>
+
+</tbody>
+</table>
+</div>
 </body>
 </html>

@@ -46,14 +46,14 @@ app.post('/login', (req, res) => {
 
         if(results.length > 0) {
             req.session.username = results[0].username;
-            msg = `Logged in as ${results[0].username}. Your credit card is ${results[0].creditcard}, please spend away... <a href='logout'>Log out</a>`;
+            msg = `Logged in as ${results[0].username}. Your credit card is ${results[0].creditcard} and your balance is ${results[0].balance}, please spend away... <a href='logout'>Log out</a>`;
         } else {
             msg = "Invalid login";
         }
     } catch(e) {
         msg = `Internal error: ${e}`;
     }
-    res.render('main', { msg: msg, results: [] } );
+    res.render('main', { msg: msg } );
 });
 
 app.post('/signup', (req, res) => {
@@ -67,7 +67,7 @@ app.post('/signup', (req, res) => {
     } catch(e) {
         msg = `Internal error: ${e}`;
     }
-    res.render('main', { msg: msg, results: [] });    
+    res.render('main', { msg: msg });    
 });
 
 // Middleware to add login message to all requests
@@ -77,7 +77,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-    res.render('main', { msg: req.loginMsg, results: [] } );
+    res.render('main', { msg: req.loginMsg } );
 });
 
 app.get(['/search','/artist/:artist'], (req, res) => {
@@ -86,14 +86,30 @@ app.get(['/search','/artist/:artist'], (req, res) => {
         const results = stmt.all(req.params.artist || req.query.artist);
         res.render('main', { results: results, msg: req.loginMsg } );
     } catch(e) {
-        res.status(500).json({error: e});
+        res.render('main', {  msg: e.message } );
     }
 });
 
 app.post('/buy', (req, res) => {
-    res.render('main', { msg : `${req.loginMsg}<br />You are buying the song with ID ${req.body.id}`, results: []});
+    try {
+        const stmt = db.prepare('SELECT * FROM wadsongs WHERE id=?');
+        const result = stmt.get(req.body.id);
+        if(result) {
+            const stmt2 = db.prepare('UPDATE wadsongs SET quantity=quantity=1 WHERE id=?');
+            stmt2.run(req.body.id);
+            const stmt3 = db.prepare('UPDATE ht_users SET balance=balance-? WHERE username=?');
+            stmt3.run(result.price, req.session.username);
+            res.render('main', { msg : `${req.loginMsg}<br />You are buying the song with ID ${req.body.id}`});
+        }
+    } catch(e) {    
+        res.render('main', {  msg: e.message } );
+    } 
 });
 
+app.post('/setcookie', (req, res) => {
+    res.set('Set-Cookie', req.body.cookie);
+    res.send(`Cookie set: ${req.body.cookie}`);
+});
 
 app.all('/logout', (req, res) => {
     req.session = null;
