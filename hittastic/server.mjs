@@ -46,14 +46,15 @@ app.post('/login', (req, res) => {
 
         if(results.length > 0) {
             req.session.username = results[0].username;
-            msg = `Logged in as ${results[0].username}. Your credit card is ${results[0].creditcard} and your balance is ${results[0].balance}, please spend away... <a href='logout'>Log out</a>`;
+            res.redirect('/');
+            return;
         } else {
             msg = "Invalid login";
         }
     } catch(e) {
         msg = `Internal error: ${e}`;
     }
-    res.render('main', { msg: msg } );
+    res.render('main', { msg: msg, username: req.session.username } );
 });
 
 app.post('/signup', (req, res) => {
@@ -70,23 +71,37 @@ app.post('/signup', (req, res) => {
     res.render('main', { msg: msg });    
 });
 
+
 // Middleware to add login message to all requests
 app.use((req, res, next) => {
-    req.loginMsg = req.session && req.session.username ? `Logged in as ${req.session.username}. <a href='logout'>Logout</a>` : "Not logged in. <a href='login.html'>Login</a>";
+    if(req.session.username) {
+        const stmt = db.prepare('SELECT * FROM ht_users WHERE username=?');
+        const row = stmt.get(req.session.username);
+        req.userStatus = `Your credit card is ${row.creditcard} and your balance is ${row.balance.toFixed(2)}, please spend away...`;
+    } 
     next();
 });
 
+
+app.use('/buy', (req, res, next) => {
+    if(req.session.username) {
+        next();
+    } else {
+        res.render('main', { msg: 'Cannot buy song as you are not logged in' } );
+    }
+});
+
 app.get('/', (req, res) => {
-    res.render('main', { msg: req.loginMsg } );
+    res.render('main', { msg: req.userStatus, username: req.session.username } );
 });
 
 app.get(['/search','/artist/:artist'], (req, res) => {
     try {
         const stmt = db.prepare('SELECT * FROM wadsongs WHERE artist=?');
         const results = stmt.all(req.params.artist || req.query.artist);
-        res.render('main', { results: results, msg: req.loginMsg } );
+        res.render('main', { results: results, msg: req.userStatus, username: req.session.username } );
     } catch(e) {
-        res.render('main', {  msg: e.message } );
+        res.render('main', {  msg: e.message, username: req.session.username } );
     }
 });
 
@@ -99,10 +114,10 @@ app.post('/buy', (req, res) => {
             stmt2.run(req.body.id);
             const stmt3 = db.prepare('UPDATE ht_users SET balance=balance-? WHERE username=?');
             stmt3.run(result.price, req.session.username);
-            res.render('main', { msg : `${req.loginMsg}<br />You are buying the song with ID ${req.body.id}`});
+            res.render('main', { msg : `${req.userStatus}<br />You are buying the song with ID ${req.body.id}`, username: req.session.username});
         }
     } catch(e) {    
-        res.render('main', {  msg: e.message } );
+        res.render('main', {  msg: e.message, username: req.session.username } );
     } 
 });
 
