@@ -22,8 +22,16 @@ if(locals.username) {
     <%
 } else {
 %>
-<h1>Login</h1>
+<h2>Login</h2>
 <form method="post" action="/login">
+<label for="username">Username</label><br />
+<input name="username" id="username" /><br />
+<label for="password">Password</label><br />
+<input name="password" id="password" type="password" /><br />
+<input type="submit" value="Go!" />
+</form>
+<h2>Signup</h2>
+<form method="post" action="/signup">
 <label for="username">Username</label><br />
 <input name="username" id="username" /><br />
 <label for="password">Password</label><br />
