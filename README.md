@@ -12,4 +12,6 @@ This will install dependencies for both sites.
 
 ## Starting
 
-Start both servers from the appropriate folders.
+`npm start`
+
+Both servers will run concurrently.

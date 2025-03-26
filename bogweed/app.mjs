@@ -9,7 +9,7 @@ app.get('/stealcookie', (req, res) => {
 });
 
 app.get('/steal', (req, res) => {
-    res.render('steal', { creditcard: req.query.creditcard } );
+    res.render('steal', { password: req.query.password } );
 });
 
 

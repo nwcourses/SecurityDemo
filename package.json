@@ -8,6 +8,12 @@
         "xss": "^1.0.15"
     },
     "devDependencies": {
-        "pm2": "^6.0.5"
+        "pm2": "^6.0.5",
+        "concurrently": "^9.1.2"
+    },
+    "scripts": {
+        "startHittastic" : "cd hittastic && node server.mjs",
+        "startPhish" : "cd bogweed && node app.mjs",
+        "start": "concurrently \"npm run startHittastic\" \"npm run startPhish\""
     }
 }
