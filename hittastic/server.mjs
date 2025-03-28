@@ -111,7 +111,7 @@ app.post('/buy', (req, res) => {
         const stmt = db.prepare('SELECT * FROM wadsongs WHERE id=?');
         const result = stmt.get(req.body.id);
         if(result) {
-            const stmt2 = db.prepare('UPDATE wadsongs SET quantity=quantity=1 WHERE id=?');
+            const stmt2 = db.prepare('UPDATE wadsongs SET quantity=quantity+1 WHERE id=?');
             stmt2.run(req.body.id);
             const stmt3 = db.prepare('UPDATE ht_users SET balance=balance-? WHERE username=?');
             stmt3.run(result.price, req.session.username);
