@@ -62,7 +62,7 @@ app.post('/signup', (req, res) => {
     try {
         // TODO 1. replace with secure version using placeholders
         // TODO 2. change to use passwords encrypted with bcrypt
-        const stmt = db.prepare(`INSERT INTO ht_users (username, password) VALUES ('${req.body.username}', '${req.body.password}')`);
+        const stmt = db.prepare(`INSERT INTO ht_users (username, password, balance, creditcard) VALUES ('${req.body.username}', '${req.body.password}', 100.0, '1234567890123456')`);
         const info = stmt.run();
         msg = `Signed up with ID ${info.lastInsertRowid}`;
     } catch(e) {
