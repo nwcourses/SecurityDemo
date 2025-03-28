@@ -107,7 +107,6 @@ app.get(['/search','/artist/:artist'], (req, res) => {
 });
 
 app.post('/buy', (req, res) => {
-    console.log('buy route');
     try {
         const stmt = db.prepare('SELECT * FROM wadsongs WHERE id=?');
         const result = stmt.get(req.body.id);
@@ -117,7 +116,17 @@ app.post('/buy', (req, res) => {
             const stmt3 = db.prepare('UPDATE ht_users SET balance=balance-? WHERE username=?');
             stmt3.run(result.price, req.session.username);
         }
-		res.render('main', { msg : `${req.userStatus}<br />You are buying the song with ID ${req.body.id}`, username: req.session.username});
+        res.render('main', { msg : `${req.userStatus}<br />You are buying the song with ID ${req.body.id}`, username: req.session.username});
+    } catch(e) {    
+        res.render('main', {  msg: e.message, username: req.session.username } );
+    } 
+});
+
+app.post('/song/new', (req, res) => {
+    try {
+        const stmt = db.prepare("INSERT INTO wadsongs(title, artist, year) VALUES (?,?,?)");
+        const info = stmt.run(req.body.title, req.body.artist, req.body.year);
+        res.render('main', { msg : `Song added with ID ${info.lastInsertRowid}`, username: req.session.username});
     } catch(e) {    
         res.render('main', {  msg: e.message, username: req.session.username } );
     } 
